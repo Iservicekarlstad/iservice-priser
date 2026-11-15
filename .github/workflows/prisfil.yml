@@ -1,0 +1,52 @@
+name: Uppdatera prisfilen
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: prisfil
+  cancel-in-progress: false
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      publicera: ${{ steps.diff.outputs.publicera }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node update.mjs
+      - id: diff
+        run: |
+          if [ -n "$(git status --porcelain public)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/priser.json
+            git commit -m "Uppdatera prisfilen"
+            git push
+            echo "publicera=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "publicera=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.diff.outputs.publicera == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  # Eget jobb så att GitHub bara registrerar en publicering när filen faktiskt har ändrats.
+  publicera:
+    needs: hamta
+    if: needs.hamta.outputs.publicera == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
