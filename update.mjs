@@ -1,15 +1,15 @@
-// Bygger public/priser.json från KassaApps publika pris-rutter i Google Apps Script. Samma innehåll som
-// byggPrisfil_ i KassaApp/AppsScript_Code.gs: bara priser som redan visas på iservicesverige.se.
+// Bygger public/priser.json från KassaApps publika pris-rutter (Cloudflare-tjänsten iservice-sync, /kassa –
+// flyttad från Google Apps Script nov 2026). Bara priser som redan visas på iservicesverige.se.
 // Körs av .github/workflows/prisfil.yml var 10:e minut.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
-const API = 'https://script.google.com/macros/s/AKfycbzIbDtT2SsCNGXxePZ_UztQDw4yDV1f51xc3HFUtazw_48NuK1Gg5Dv7sTF7GIlEn1G/exec';
+const API = 'https://iservice-sync.iservice-karlstad.workers.dev/kassa';
 const FILE = 'public/priser.json';
 const HOUR = 60 * 60 * 1000;
 const RENEW_AFTER = 20 * HOUR; // hemsidan godkänner filen i 48 h, så tidsstämpeln förnyas en gång per dygn
 const ALARM_AFTER = 36 * HOUR; // först då räknas ett misslyckat hämtförsök som ett fel (GitHub mejlar)
 
-// Apps Script svarar ibland med en felsida eller långsamt: ett anrop i taget, flera försök.
+// Ett anrop i taget med några försök, om tjänsten tillfälligt inte svarar.
 async function get(type) {
   let err;
   for (let i = 0; i < 4; i++) {
@@ -38,7 +38,7 @@ try {
   if (!Array.isArray(options.modeller) || !options.modeller.length || !sale.prices || !valuation || !Object.keys(valuation).length)
     throw new Error('ofullständigt svar');
 } catch (e) {
-  console.log(`::warning::Kunde inte hämta priserna från Apps Script (${e.message}). Den gamla filen ligger kvar.`);
+  console.log(`::warning::Kunde inte hämta priserna (${e.message}). Den gamla filen ligger kvar.`);
   process.exit(age > ALARM_AFTER ? 1 : 0);
 }
 
