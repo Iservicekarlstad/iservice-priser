@@ -6,7 +6,7 @@
    (sparas i webbläsaren; ?chatt=av stänger av). Sätt false när den ska synas för alla. */
 (function () {
   'use strict';
-  var TEST_LAGE = true;
+  var TEST_LAGE = false;
   var API = 'https://iservice-sync.iservice-karlstad.workers.dev';
   var TEL = '054-771 22 00', TEL_LANK = 'tel:+46547712200', MEJL = 'support@iservicesverige.se';
   var NAVY = '#03086b', KORALL = '#ff6363';
