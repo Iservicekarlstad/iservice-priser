@@ -8,7 +8,7 @@
   'use strict';
   var TEST_LAGE = true;
   var API = 'https://iservice-sync.iservice-karlstad.workers.dev';
-  var TEL = '054-771 22 00', TEL_LANK = 'tel:+46547712200';
+  var TEL = '054-771 22 00', TEL_LANK = 'tel:+46547712200', MEJL = 'support@iservicesverige.se';
   var NAVY = '#03086b', KORALL = '#ff6363';
   var LS = 'iservice_chatt_v1';
 
@@ -38,23 +38,16 @@
     '.isc-bot a{color:' + NAVY + ';font-weight:600}' +
     '.isc-tankar{color:#758696;font-style:italic}' +
     '.isc-snabb{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}' +
-    '.isc-snabb button,.isc-kontakt a,.isc-kontakt button{border:1.5px solid ' + NAVY + ';background:#fff;color:' + NAVY + ';border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none}' +
-    '.isc-snabb button:hover,.isc-kontakt a:hover,.isc-kontakt button:hover{background:' + NAVY + ';color:#fff}' +
+    '.isc-snabb button,.isc-kontakt a{border:1.5px solid ' + NAVY + ';background:#fff;color:' + NAVY + ';border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none}' +
+    '.isc-snabb button:hover,.isc-kontakt a:hover{background:' + NAVY + ';color:#fff}' +
     '.isc-kontakt{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start}' +
     '#isc-form{display:flex;gap:8px;padding:10px;border-top:1px solid #e3e5f0;background:#fff}' +
     '#isc-text{flex:1;border:1.5px solid #c8c8c8;border-radius:10px;padding:9px 11px;font:inherit;font-size:15px;resize:none;max-height:90px}' +
-    '#isc-text:focus,.isc-falt:focus{outline:none;border-color:' + NAVY + '}' +
+    '#isc-text:focus{outline:none;border-color:' + NAVY + '}' +
     '#isc-skicka{background:' + KORALL + ';color:#fff;border:0;border-radius:10px;padding:0 14px;font:inherit;font-weight:600;cursor:pointer}' +
     '#isc-skicka:disabled{opacity:.5;cursor:default}' +
-    '.isc-mejl{background:#fff;border:1px solid #e3e5f0;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-self:stretch}' +
-    '.isc-mejl b{font-size:14px}.isc-falt{border:1.5px solid #c8c8c8;border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;width:100%;box-sizing:border-box}' +
-    '.isc-mejl .isc-rad{display:flex;gap:6px;justify-content:flex-end}' +
-    '.isc-mejl .isc-skicka2{background:' + KORALL + ';color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}' +
-    '.isc-mejl .isc-avbryt{background:transparent;border:0;color:#758696;font:inherit;cursor:pointer}' +
-    '.isc-fel{color:#c0392b;font-size:13px}' +
-    '.isc-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}' +
     '#isc-info{font-size:11px;color:#758696;text-align:center;padding:0 10px 8px;background:#fff}' +
-    '@media (max-width:520px){#isc-text,.isc-falt{font-size:16px}#isc-ruta{right:0;left:0;bottom:0;width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0}#isc-knapp{right:14px;bottom:14px}#isc-ruta.oppen~#isc-knapp{display:none}}';
+    '@media (max-width:520px){#isc-text{font-size:16px}#isc-ruta{right:0;left:0;bottom:0;width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0}#isc-knapp{right:14px;bottom:14px}#isc-ruta.oppen~#isc-knapp{display:none}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   function el(tag, attrs, text) {
@@ -82,12 +75,16 @@
   try { samtal = JSON.parse(sessionStorage.getItem(LS) || '[]'); } catch (e) {}
   var upptagen = false;
 
-  // Gör adresser och iService-sidor klickbara, resten är ren text (inget HTML från servern).
+  // Gör webbadresser, telefonnummer och e-postadresser klickbara (tel:/mailto: öppnar ringappen/mejlappen).
+  // Resten är ren text – inget HTML från servern.
   function lankifiera(nod, s) {
-    var re = /(https?:\/\/[^\s)]+[^\s).,!?])/g, sista = 0, m;
+    var re = /(https?:\/\/[^\s)]+[^\s).,!?])|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|((?:\+46\s?|0)\d{1,3}[\s-]?\d{2,3}[\s-]?\d{2}[\s-]?\d{2,3})/g, sista = 0, m;
     while ((m = re.exec(s))) {
       nod.appendChild(document.createTextNode(s.slice(sista, m.index)));
-      var a = el('a', { href: m[1], target: /iservicesverige\.se/.test(m[1]) ? '_self' : '_blank', rel: 'noopener' }, m[1].replace(/^https?:\/\/(www\.)?iservicesverige\.se/, 'iservicesverige.se'));
+      var a;
+      if (m[1]) a = el('a', { href: m[1], target: /iservicesverige\.se/.test(m[1]) ? '_self' : '_blank', rel: 'noopener' }, m[1].replace(/^https?:\/\/(www\.)?iservicesverige\.se/, 'iservicesverige.se'));
+      else if (m[2]) a = el('a', { href: 'mailto:' + m[2] }, m[2]);
+      else a = el('a', { href: 'tel:' + m[3].replace(/[\s-]/g, '').replace(/^0/, '+46') }, m[3]);
       nod.appendChild(a); sista = re.lastIndex;
     }
     nod.appendChild(document.createTextNode(s.slice(sista)));
@@ -100,46 +97,14 @@
   }
   function spara() { try { sessionStorage.setItem(LS, JSON.stringify(samtal.slice(-20))); } catch (e) {} }
 
+  // Kontakt: ring, eller mejla – länken öppnar besökarens egen mejlapp med frågan redan ifylld.
   function kontaktKnappar() {
     var k = el('div', { 'class': 'isc-kontakt' });
-    var tel = el('a', { href: TEL_LANK }, 'Ring ' + TEL);
-    var mejl = el('button', { type: 'button' }, 'Skicka meddelande');
-    mejl.addEventListener('click', function () { k.remove(); mejlFormular(); });
-    k.appendChild(tel); k.appendChild(mejl);
+    var senaste = ''; for (var i = samtal.length - 1; i >= 0; i--) if (samtal[i].roll === 'kund') { senaste = samtal[i].text; break; }
+    var mejl = 'mailto:' + MEJL + '?subject=' + encodeURIComponent('Fråga från hemsidan') + (senaste ? '&body=' + encodeURIComponent(senaste + '\n\n') : '');
+    k.appendChild(el('a', { href: TEL_LANK }, 'Ring ' + TEL));
+    k.appendChild(el('a', { href: mejl }, 'Mejla oss'));
     lista.appendChild(k); lista.scrollTop = lista.scrollHeight;
-  }
-
-  function mejlFormular() {
-    var f = el('form', { 'class': 'isc-mejl' });
-    f.innerHTML = '<b>Skicka ett meddelande till iService</b>' +
-      '<input class="isc-falt" name="namn" placeholder="Ditt namn" maxlength="100" required autocomplete="name">' +
-      '<input class="isc-falt" name="epost" type="email" placeholder="Din e-postadress (vi svarar hit)" maxlength="120" required autocomplete="email">' +
-      '<input class="isc-falt" name="telefon" type="tel" placeholder="Telefon (frivilligt)" maxlength="40" autocomplete="tel">' +
-      '<textarea class="isc-falt" name="meddelande" rows="3" maxlength="2000" placeholder="Vad gäller det?" required></textarea>' +
-      '<div class="isc-hp" aria-hidden="true"><input name="webbplats" tabindex="-1" autocomplete="off"></div>' +
-      '<div class="isc-fel" hidden></div>' +
-      '<div class="isc-rad"><button type="button" class="isc-avbryt">Avbryt</button><button type="submit" class="isc-skicka2">Skicka</button></div>';
-    var senasteFraga = ''; for (var i = samtal.length - 1; i >= 0; i--) if (samtal[i].roll === 'kund') { senasteFraga = samtal[i].text; break; }
-    f.meddelande.value = senasteFraga;
-    f.querySelector('.isc-avbryt').addEventListener('click', function () { f.remove(); kontaktKnappar(); });
-    f.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var fel = f.querySelector('.isc-fel'), btn = f.querySelector('.isc-skicka2');
-      btn.disabled = true; btn.textContent = 'Skickar…'; fel.hidden = true;
-      fetch(API + '/chatt/kontakt', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ namn: f.namn.value, epost: f.epost.value, telefon: f.telefon.value, meddelande: f.meddelande.value, webbplats: f.webbplats.value, samtal: samtal })
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        if (!j.ok) throw new Error(j.fel || 'Det gick inte att skicka.');
-        f.remove();
-        bubbla('bot', 'Tack ' + f.namn.value.split(' ')[0] + '! Ditt meddelande är skickat – vi svarar till ' + f.epost.value + ' så snart vi kan.');
-      }).catch(function (err) {
-        btn.disabled = false; btn.textContent = 'Skicka';
-        fel.textContent = err.message || ('Det gick inte att skicka – ring oss på ' + TEL + '.'); fel.hidden = false;
-      });
-    });
-    lista.appendChild(f); lista.scrollTop = lista.scrollHeight;
-    f.namn.focus();
   }
 
   function snabbval() {
@@ -171,7 +136,7 @@
       })
       .catch(function () {
         vant.remove();
-        bubbla('bot', 'Jag når inte fram just nu. Ring oss på ' + TEL + ' eller skicka ett meddelande.');
+        bubbla('bot', 'Jag når inte fram just nu. Ring oss på ' + TEL + ' eller mejla ' + MEJL + '.');
         kontaktKnappar();
       })
       .then(function () { upptagen = false; skicka.disabled = false; text.focus(); });
