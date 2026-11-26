@@ -10,6 +10,7 @@
   var API = 'https://iservice-sync.iservice-karlstad.workers.dev';
   var TEL = '054-771 22 00', TEL_LANK = 'tel:+46547712200', MEJL = 'support@iservicesverige.se';
   var NAVY = '#03086b', KORALL = '#ff6363';
+  var LOGGA = 'https://cdn.prod.website-files.com/6058f5aedd60511bcb289bdb/6058fa99a666df92d2992305_iservice-rgb.svg';
   var LS = 'iservice_chatt_v1';
 
   function las(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -29,7 +30,7 @@
     '#isc-ruta{position:fixed;right:20px;bottom:92px;z-index:99999;width:370px;max-width:calc(100vw - 32px);height:560px;max-height:calc(100vh - 120px);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(3,8,107,.3);display:none;flex-direction:column;overflow:hidden;font-family:inherit;color:#0f1357;font-size:15px;line-height:1.45}' +
     '#isc-ruta.oppen{display:flex}' +
     '#isc-topp{background:' + NAVY + ';color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}' +
-    '#isc-topp b{font-size:16px;display:block}#isc-topp small{opacity:.8;font-size:12px}' +
+    '#isc-logga{display:block;height:22px;width:auto;margin:2px 0 5px}#isc-topp small{opacity:.8;font-size:12px;display:block}' +
     '#isc-stang{margin-left:auto;background:transparent;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:4px 8px}' +
     '#isc-lista{flex:1;overflow-y:auto;padding:14px;background:#f5f6fb;display:flex;flex-direction:column;gap:8px}' +
     '.isc-m{max-width:85%;padding:9px 12px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word}' +
@@ -59,7 +60,7 @@
 
   var ruta = el('div', { id: 'isc-ruta', role: 'dialog', 'aria-label': 'Chatta med iService' });
   ruta.innerHTML =
-    '<div id="isc-topp"><div><b>iService</b><small>Svarar på frågor om reparationer, priser och köp/sälj</small></div>' +
+    '<div id="isc-topp"><div><img id="isc-logga" src="' + LOGGA + '" alt="iService"><small>Svarar på frågor om reparationer, priser och köp/sälj</small></div>' +
     '<button id="isc-stang" aria-label="Stäng chatten">×</button></div>' +
     '<div id="isc-lista" aria-live="polite"></div>' +
     '<form id="isc-form"><textarea id="isc-text" rows="1" maxlength="600" placeholder="Skriv din fråga…" aria-label="Din fråga"></textarea>' +
