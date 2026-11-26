@@ -156,6 +156,7 @@
     t = String(t || '').trim();
     if (!t || upptagen) return;
     upptagen = true; skicka.disabled = true;
+    var sv = lista.querySelector('.isc-snabb'); if (sv) sv.remove();
     bubbla('kund', t);
     samtal.push({ roll: 'kund', text: t }); spara();
     var vant = bubbla('bot', 'Skriver…'); vant.classList.add('isc-tankar');
